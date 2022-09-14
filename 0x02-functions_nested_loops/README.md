@@ -33,3 +33,13 @@ Prints the 9 times table, starting with zero
 Adds 2 integers and returns the result
 <h6>11-print_to_98.c</h6>
 Prints all numbers from n to 98
+<h6>100-times_table.c</h6>
+Prints the n times table, starting with zero
+<h6>101-natural.c</h6>
+Computes and prints the sum of all the multiples of 3 or 5 below 1024
+<h6>102-fibonacci.c</h6>
+Prints the first 50 Fibonacci numbers starting with 1 and 2
+<h6>103-fibonacci.c</h6>
+Computes and prints the sum of all even Fibonacci numbers under 4 million.
+<h6>104-fibonacci.c</h6>
+Computes and prints the first 98 Fibonacci numbers
