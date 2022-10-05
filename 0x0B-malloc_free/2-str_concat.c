@@ -1,30 +1,52 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "main.h"
+#include <stdlib.h>
+
 /**
- * str_concat - concatenates two strings
- * @s1: input string 1
- * @s2: input string 2
- * Return: pointer to newly allocated space in memory with both strings or NULL
+ * str_concat - function to concatene two strings
+ * @s1: the first string
+ * @s2: the second string
+ *
+ * Return: a pointer to tha allocated memory Area.
  */
 char *str_concat(char *s1, char *s2)
 {
-	char *pstr;
-	unsigned int len1 = 0, len2 = 0, i, j;
+int size1 = 0;
+int size2 = 0;
+int i, j;
+char *p;
 
-	if (s1 == 0)
-		s1 = "";
-	if (s2 == 0)
-		s2 = "";
-	while (s1[len1] != 0)
-		len1++;
-	while (s2[len2] != 0)
-		len2++;
-	len2++;
-	pstr = malloc(sizeof(char) * (len1 + len2));
-	for (i = 0; i < len1; i++)
-		pstr[i] = s1[i];
-	for (j = 0; j < len2; i++, j++)
-		pstr[i] = s2[j];
-	return (pstr);
+if (s1 == NULL)
+	s1 = "";
+if (s2 == NULL)
+	s2 = "";
+
+/* calculate the length of string 1*/
+while (*(s1 + size1))
+	size1++;
+/* calculate the length of the string 2 */
+while (*(s2 + size2))
+	size2++;
+
+/* a pointer pointed to the memory area allocation*/
+p = malloc((size1 + size2) + 1);
+
+if (p == NULL)
+	return (NULL);
+i = 0;
+/* copying the first string on the allocated memory*/
+while (i < size1)
+{
+	*(p + i) = *(s1 + i);
+			i++;
+}
+
+/* copying the second string */
+j = 0;
+while (j <= size2)
+{
+	*(p + j + size1) = *(s2 + j);
+		j++;
+}
+/* the program return a pointer pointed */
+return (p);
 }
