@@ -1,13 +1,16 @@
+#include "main.h"
 #include <stdio.h>
+
 /**
- * main - program prints its own name.
- * @argc: argument count
- * @argv: argument vectors
- * Return: 0 on success
+ * main - it all starts here
+ * @argc: the number of arguments
+ * @argv: array of pointers to arguments
+ *
+ * Return: Always 0.
  */
 int main(int argc, char *argv[])
 {
-	argc--; /*added to pass checks*/
-	printf("%s\n", argv[0]);
+	if (argc)
+		printf("%s\n", argv[0]);
 	return (0);
 }
