@@ -1,72 +1,124 @@
 #include "main.h"
+#include <stdlib.h>
+
 /**
- * print_char - Prints character
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-int print_char(va_list list)
+  * _print_format - Prints a format
+  * @format: The format to prints
+  * @args: A list of variadic arguments
+  *
+  * Return: The length of the format
+  */
+int _print_format(const char *format, va_list args)
 {
-	_write_char(va_arg(list, int));
-	return (1);
+	int count = 0;
+	int i = 0;
+
+	while (format && format[i])
+	{
+		if (format[i] == '%')
+		{
+			if (format[i + 1] == '\0')
+				return (-1);
+
+			i++;
+
+			while (format[i] == ' ')
+				i++;
+
+			if (format[i] == '%')
+				count += _write(format[i]);
+
+			if (_validate_char(format[i]) == 0)
+			{
+				count = _print_invalid_spec(format[i - 1], format[i], count);
+			}
+			else
+			{
+				count += _print_spec(format[i], args);
+			}
+		}
+		else
+		{
+			count += _write(format[i]);
+		}
+
+		i++;
+	}
+
+	return (count);
 }
 
 /**
- * print_string - Prints a string
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-int print_string(va_list list)
+  * _print_spec - Prints a valid specifier
+  * @format: The specifier to prints
+  * @args: A list of variadic arguments
+  *
+  * Return: The length of the specifier
+  */
+int _print_spec(char format, va_list args)
 {
-	int i;
-	char *str;
+	int i  = 0, length = 0;
+	spc_dt _types[] = {
+		{"c", _print_a_char},
+		{"s", _print_a_string},
+		{"d", _print_a_integer},
+		{"i", _print_a_integer},
+		{"b", _print_int_binary},
+		{NULL, NULL}
+	};
 
-	str = va_arg(list, char *);
-	if (str == NULL)
-		str = "(null)";
-	for (i = 0; str[i] != '\0'; i++)
-		_write_char(str[i]);
-	return (i);
+	while (_types[i].specifier)
+	{
+		if (*_types[i].specifier == format)
+			length = _types[i].f(args);
+
+		i++;
+	}
+
+	return (length);
 }
 
 /**
- * print_percent - Prints a percent symbol
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-int print_percent(__attribute__((unused))va_list list)
+  * _print_invalid_spec - Prints a invalid specifier
+  * @prev_format: The previous specifier of actual specifier
+  * @format: The specifier to prints
+  * @count: The current count before prints invalid specifiers
+  *
+  * Return: The current count after prints invalid specifiers
+  */
+int _print_invalid_spec(char prev_format, char format, int count)
 {
-	_write_char('%');
-	return (1);
+	count += _write('%');
+
+	if (prev_format == ' ')
+	{
+		count += _write(' ');
+		count += _write(format);
+	}
+	else
+	{
+		count += _write(format);
+	}
+
+	return (count);
 }
 
 /**
- * print_integer - Prints an integer
- * @list: list of arguments
- * Return: Will return the amount of characters printed.
- */
-int print_integer(va_list list)
+  * _validate_char - validate the type
+  * @_type: character to be comparate
+  *
+  * Return: 1 if char is equal to a type
+  */
+int _validate_char(char _type)
 {
-	int num_length;
+	char _types[] = {'c', 's', 'd', 'i', 'b', '%'};
+	int i = 0;
 
-	num_length = print_number(list);
-	return (num_length);
-}
-
-/**
- * unsigned_integer - Prints Unsigned integers
- * @list: List of all of the argumets
- * Return: a count of the numbers
- */
-int unsigned_integer(va_list list)
-{
-	unsigned int num;
-
-	num = va_arg(list, unsigned int);
-
-	if (num == 0)
-		return (print_unsgined_number(num));
-
-	if (num < 1)
-		return (-1);
-	return (print_unsgined_number(num));
+	while (_types[i])
+	{
+		if (_types[i] == _type)
+			return (1);
+		i++;
+	}
+	return (0);
 }
