@@ -1,42 +1,67 @@
 #include "main.h"
-#include <stdio.h>
 /**
-  * main - entry point
-  * @ac: argument count
-  * @av: array of argument tokens
-  * Return: 0 on success
-  */
-int main(int ac, char *av[])
+ * end_func - function that deals with all standard errors
+ * @num: exit status number or file descriptor
+ * @str: file name either to_file or from_file, or NULL
+ * Return: 97, 98, 99, or 100 depending on input num
+ */
+int end_func(int num, char *str)
 {
-	int fd_from, fd_to, rd_stat, wr_stat;
-	mode_t perm = S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH;
-	char buffer[BUFSIZE];
+	int value;
 
-	if (ac != 3)
-		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n"), exit(97);
-	fd_from = open(av[1], O_RDONLY);
-	if (fd_from == -1)
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", av[1]), exit(98);
-	fd_to = open(av[2], O_CREAT | O_WRONLY | O_TRUNC, perm);
-	if (fd_to == -1)
-		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", av[2]), exit(99);
-	rd_stat = 1;
-	while (rd_stat)
+	switch (num)
 	{
-		rd_stat = read(fd_from, buffer, BUFSIZE);
-		if (rd_stat == -1)
-			dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", av[1]), exit(98);
-		if (rd_stat > 0)
-		{
-			wr_stat = write(fd_to, buffer, rd_stat);
-			if (wr_stat != rd_stat || wr_stat == -1)
-				dprintf(STDERR_FILENO, "Error: Can't write to %s\n", av[2]), exit(99);
-		}
+	case 97:
+		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+		value = 97;
+		break;
+	case 98:
+		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", str);
+		value = 98;
+		break;
+	case 99:
+		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", str);
+		value = 99;
+		break;
+	default:
+		dprintf(STDERR_FILENO, "Error: Can't close fd %d", num);
+		value = 100;
+		break;
 	}
-	if (close(fd_from) == -1)
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_from), exit(100);
-	if (close(fd_to) == -1)
-		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_to), exit(100);
-	return (0);
+	return (value);
 }
+/**
+ * main - copies the content of a file to another file
+ * @argc: arguments count
+ * @argv: pointer to list of argument strings
+ * Return: 0 on success, 97, 98, 99, or 100 on failure
+ */
+int main(int argc, char **argv)
+{
+	int fd_to, fd_from, read_val;
+	char *file_from, *file_to, buffer[BUFLEN];
 
+	if (argc != 3)
+		exit(end_func(97, NULL));
+	file_from = argv[1], file_to = argv[2];
+	fd_from = open(file_from, O_RDONLY);
+	if (fd_from == -1)
+		exit(end_func(98, file_from));
+	fd_to = open(file_to, O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	if (fd_to == -1)
+		exit(close(fd_from) == -1 ? end_func(fd_from, NULL) :
+			 end_func(99, file_to));
+	read_val = read(fd_from, &buffer, BUFLEN);
+	while (read_val)
+	{
+		if (read_val == -1)
+			exit(close(fd_from) == -1 ? end_func(fd_from, NULL) :
+				 close(fd_to) == -1 ? end_func(fd_to, NULL) :
+				 end_func(98, file_from));
+		if (write(fd_to, &buffer, read_val) == -1)
+			exit(end_func(99, file_to));
+		read_val = read(fd_from, &buffer, BUFLEN);
+	}
+	return (close(fd_from) == -1 ? end_func(fd_from, NULL) :
+			close(fd_to) == -1 ? end_func(fd_to, NULL) : 0);
+}
